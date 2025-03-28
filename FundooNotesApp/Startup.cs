@@ -43,8 +43,13 @@ namespace FundooNotesApp
             //for configure database connection
             services.AddDbContext<FundooDBContext>(options => options.UseSqlServer(Configuration["ConnectionStrings:DbConnection"]));
 
+            //for User
             services.AddTransient<IUserRepo, UserRepo>();
             services.AddTransient<IUserManager, UserManager>();
+
+            //for Notes
+            services.AddTransient<INotesRepo, NotesRepo>();
+            services.AddTransient<INotesManager, NotesManager>();
 
             //For swagger
             // services.AddSwaggerGen();
