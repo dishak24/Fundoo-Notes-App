@@ -58,7 +58,7 @@ namespace RepositoryLayer.Services
         }
 
         //checking email already exit or not
-        public bool CheckEmailDuplicate(string email)
+        public bool CheckEmailExist(string email)
         {
             var result = this.context.Users.FirstOrDefault(x => x.Email == email);
             if (result == null)
@@ -112,6 +112,25 @@ namespace RepositoryLayer.Services
             forgotPassword.Email = User.Email;
             forgotPassword.Token = GenerateToken(User.Email, User.UserId);
             return forgotPassword;
+        }
+
+        //To Reset the password:
+        //1. check email exist or not
+        //2. then change password
+        public bool ResetPassword(string email, ResetPasswordModel reset)
+        {
+            var user = context.Users.ToList().Find(u => u.Email == email);
+
+            if (CheckEmailExist(user.Email))
+            {
+                user.Password = EncodePasswordToBase64(reset.ConfirmPassword);
+                context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
     }

@@ -8,12 +8,19 @@ namespace ManagerLayer.Interfaces
 {
     public interface IUserManager
     {
-        public UserEntity Register(RegisterModel model);
+        //for register user
+        public UserEntity Register(RegisterModel registerModel);
 
-        public bool CheckEmailDuplicate(string email);
+        //for duplicate email checking
+        public bool CheckEmailExist(string email);
 
+        //for login user
         public string Login(LoginModel loginModel);
 
+        //Forgot password
         public ForgotPasswordModel ForgotPassword(string email);
+
+        //Reset passwod
+        public bool ResetPassword(string email, ResetPasswordModel reset);
     }
 }

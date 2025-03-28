@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using ManagerLayer.Interfaces;
 using ManagerLayer.Services;
 using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -14,6 +17,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using RepositoryLayer.Context;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
@@ -42,7 +47,61 @@ namespace FundooNotesApp
             services.AddTransient<IUserManager, UserManager>();
 
             //For swagger
-            services.AddSwaggerGen();
+            // services.AddSwaggerGen();
+
+            //for adding Authorization in swagger --- to paste token
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Fun-Doo-Notes API",
+                    Version = "v1"
+                });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter you valid Token",
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                                        {
+                                            {
+                                                new OpenApiSecurityScheme
+                                                {
+                                                    Reference = new OpenApiReference
+                                                    {
+                                                        Type = ReferenceType.SecurityScheme,
+                                                            Id = "Bearer"
+                                                    }
+                                                },
+                                                new string[] {}
+                                            }
+                                         });
+            });
+
+            services.AddAuthentication(x =>
+                                        {
+                                            x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                                            x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+                                        }).AddJwtBearer( o =>
+                                                        {
+                                                            var key = Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]);
+                                                            o.SaveToken = true;
+                                                            o.TokenValidationParameters = new TokenValidationParameters
+                                                            {
+                                                                ValidateIssuer = false,
+                                                                ValidateAudience = false,
+                                                                ValidateLifetime = true,
+                                                                ValidateIssuerSigningKey = true,
+                                                                ValidIssuer = Configuration["Jwt:Issue"],
+                                                                ValidAudience = Configuration["Jwt:Audience"],
+                                                                IssuerSigningKey = new SymmetricSecurityKey(key)
+                                                            };
+                                                        });
 
             //Configuring MassTrasit --- RabbitMQ
             services.AddMassTransit(x =>
@@ -68,6 +127,8 @@ namespace FundooNotesApp
             {
                 app.UseDeveloperExceptionPage();
             }
+            //authentication must be on top
+            app.UseAuthentication();
 
             app.UseHttpsRedirection();
 

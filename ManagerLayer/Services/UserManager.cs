@@ -22,9 +22,9 @@ namespace ManagerLayer.Services
             return userRepo.Register(model);
         }
 
-        public bool CheckEmailDuplicate(string email)
+        public bool CheckEmailExist(string email)
         {
-            return userRepo.CheckEmailDuplicate(email);
+            return userRepo.CheckEmailExist(email);
         }
 
         public string Login(LoginModel loginModel)
@@ -35,6 +35,11 @@ namespace ManagerLayer.Services
         public ForgotPasswordModel ForgotPassword(string email)
         {
             return userRepo.ForgotPassword(email);
+        }
+
+        public bool ResetPassword(string email, ResetPasswordModel reset)
+        {
+            return userRepo.ResetPassword(email, reset);
         }
     }
 }

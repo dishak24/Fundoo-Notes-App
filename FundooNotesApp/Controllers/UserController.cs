@@ -1,6 +1,8 @@
 ﻿using CommonLayer.Models;
 using ManagerLayer.Interfaces;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
+
 
 //using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +33,7 @@ namespace FundooNotesApp.Controllers
         public IActionResult Register(RegisterModel model)
         {
             //adding code to checking email already used or not
-            var check = userManager.CheckEmailDuplicate(model.Email);
+            var check = userManager.CheckEmailExist(model.Email);
             if (check)
             {
                 return BadRequest(new ResponseModel<UserEntity>
@@ -64,7 +66,7 @@ namespace FundooNotesApp.Controllers
 
         //login api
         [HttpPost]
-        [Route("login")]
+        [Route("Login")]
         public IActionResult Login(LoginModel loginModel)
         {
             var result = userManager.Login(loginModel);
@@ -88,13 +90,14 @@ namespace FundooNotesApp.Controllers
 
         }
 
+        //Forgot password API
         [HttpPost]
         [Route("ForgotPassword")]
         public async Task<IActionResult> ForgotPassword(string email)
         {
             try
             {
-                if (userManager.CheckEmailDuplicate(email))
+                if (userManager.CheckEmailExist(email))
                 {
                     Send send = new Send();
                     ForgotPasswordModel forgotPasswordModel = userManager.ForgotPassword(email);
@@ -121,6 +124,40 @@ namespace FundooNotesApp.Controllers
                     });
                 }
 
+            }
+            catch(Exception e)
+            {
+                throw e;
+            }
+        }
+
+        //Reset Password API
+        [Authorize]
+        [HttpPost]
+        [Route("ResetPassword")]
+        public IActionResult ResetPassword(ResetPasswordModel model)
+        {
+            try
+            {
+                string email = User.FindFirst("EmailId").Value;
+                if (userManager.ResetPassword(email, model))
+                {
+                    return Ok(new ResponseModel<string>
+                    {
+                        Success = true,
+                        Message = "Done, Password is Reset !"
+
+                    });
+                }
+                else
+                {
+                    return BadRequest(new ResponseModel<string>
+                    {
+                        Success = true,
+                        Message = "Reseting Password Failed !!!!!"
+
+                    });
+                }
             }
             catch(Exception e)
             {

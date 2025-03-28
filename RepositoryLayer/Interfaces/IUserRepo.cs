@@ -12,11 +12,15 @@ namespace RepositoryLayer.Interfaces
         public UserEntity Register(RegisterModel registerModel);
 
         //for duplicate email checking
-        public bool CheckEmailDuplicate(string email);
+        public bool CheckEmailExist(string email);
 
         //for login user
         public string Login(LoginModel loginModel);
 
+        //Forgot password
         public ForgotPasswordModel ForgotPassword(string email);
+
+        //Reset passwod
+        public bool ResetPassword(string email, ResetPasswordModel reset);
     }
 }
