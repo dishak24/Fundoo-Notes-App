@@ -56,6 +56,32 @@ namespace FundooNotesApp.Controllers
             }
         }
 
-        
+        //Get all Notes API
+        [HttpGet]
+        [Route("GetAllNotes")]
+        public IActionResult GetAllNotes()
+        {
+            try
+            {
+                List<NotesEntity> notes = notesManager.GetAllNotes();
+                if (notes == null)
+                {
+                    return BadRequest(new ResponseModel<string>
+                    {
+                        Success = true,
+                        Message = "Empty Notes !!!!!"
+
+                    });
+                }
+                else
+                {
+                    return Ok(notes);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
     }
 }

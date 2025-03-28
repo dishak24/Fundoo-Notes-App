@@ -34,6 +34,10 @@ namespace RepositoryLayer.Services
             return notes;
         }
 
-        
+        public List<NotesEntity> GetAllNotes()
+        {
+            List<NotesEntity> allNotes = context.Notes.ToList();
+            return allNotes;
+        }
     }
 }
